@@ -1,11 +1,30 @@
 <template>
-    <div style="width: 400px; background: lightcyan; height: 25px; border: 1px solid dimgray">
-        <div style="width: 400px; background: green; height: 25px"></div>
+    <div
+        style="background: lightcyan; height: 25px; border: 1px solid dimgray"
+        :style="{'width': maxValue+'px'}"
+    >
+        <div
+            style="background: green; height: 25px"
+            :style="{'width': currentValue+'px'}"></div>
     </div>
 </template>
 
 <script>
-export default {}
+export default {
+    props: {
+        maxValue: {
+            required: true,
+            type: Number
+        },
+        currentValue: {
+            required: true,
+            type: Number
+        }
+    },
+    data() {
+        return {}
+    }
+}
 </script>
 
 <style scoped>
