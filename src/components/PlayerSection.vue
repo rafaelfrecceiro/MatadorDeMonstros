@@ -1,5 +1,5 @@
 <template>
-    <v-card width="40%">
+    <v-card width="40%" :class="{'gameover': gameOver}" :disabled="gameOver">
         <v-card-text style="display: flex; justify-content: space-around; flex-wrap: wrap">
             <v-img contain max-width="175" :src="renderImage"/>
             <div>
@@ -56,6 +56,11 @@ export default {
         obj: {
             required: true,
             type: Object
+        },
+        gameOver: {
+            required: false,
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -70,14 +75,14 @@ export default {
             return require('@/assets/enemies/' + this.obj.image + '.png');
         },
         calcMaxValueProgress() {
-            let valueProgressBar = (400 * this.obj.stats.life) / this.starterMaxValueLife
-            return valueProgressBar
+            return (400 * this.obj.stats.life) / this.starterMaxValueLife
         }
-    },
-    methods: {}
+    }
 }
 </script>
 
 <style scoped>
-
+.gameover {
+    background-color: #ff6864
+}
 </style>

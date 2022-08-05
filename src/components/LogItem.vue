@@ -1,6 +1,6 @@
 <template>
     <div style="width: 100%; margin-bottom: 2px; padding-bottom: 5px; padding-top: 5px"
-         :class="{'logEnemy': type === 'enemy', 'logPlayer': type === 'player'}">
+         :class="{'logEnemy': type === 'enemy', 'logPlayer': type === 'player', 'logSystem': type === 'system'}">
         <h2>{{ content }}</h2>
     </div>
 </template>
@@ -28,5 +28,9 @@ export default {
 
 .logPlayer {
     background-color: lightgreen;
+}
+
+.logSystem {
+    background-color: lightgrey;
 }
 </style>

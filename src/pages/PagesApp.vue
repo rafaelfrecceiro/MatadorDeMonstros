@@ -1,8 +1,8 @@
 <template>
     <div class="container">
-        <player-section :obj="player"/>
-        <player-section :obj="enemy"/>
-        <actions-bar @make-move="getMovePlayer"/>
+        <player-section :obj="player" :gameOver="gameOverPlayer"/>
+        <player-section :obj="enemy" :gameOver="gameOverEnemy"/>
+        <actions-bar @make-move="getMovePlayer" :gameOver="gameOverGeneral"/>
         <log-moves :logs="logs"/>
     </div>
 </template>
@@ -20,6 +20,9 @@ export default {
     },
     data() {
         return {
+            gameOverPlayer: false,
+            gameOverEnemy: false,
+            actionPlayer: "",
             logs: [],
             player: {
                 name: "",
@@ -72,6 +75,32 @@ export default {
     created() {
         this.createPlayer()
         this.createEnemy()
+        this.addLog("Iniciando batalha!", "system")
+    },
+    watch: {
+        'player.stats.life'(newVal){
+            if(newVal <= 0) {
+                this.logs.push({
+                    content: this.player.name + " morreu",
+                    type: "player"
+                })
+                this.gameOverPlayer = true;
+            }
+        },
+        'enemy.stats.life'(newVal){
+            if(newVal <= 0) {
+                this.logs.push({
+                    content: this.enemy.name + " morreu",
+                    type: "player"
+                })
+                this.gameOverEnemy = true;
+            }
+        }
+    },
+    computed:{
+        gameOverGeneral(){
+            return this.gameOverPlayer || this.gameOverEnemy
+        }
     },
     methods: {
         createPlayer() {
@@ -122,35 +151,55 @@ export default {
         },
         getMovePlayer(type) {
             if (type === 'attack') {
+                this.actionPlayer = 'attack';
                 let min = Math.ceil(5);
                 let max = Math.floor(15);
                 let damage = (Math.floor(Math.random() * (max - min) + min)) + this.player.stats.strength
 
-                this.enemy.stats.life -= damage;
+                if ((this.enemy.stats.life - damage) >= 0) this.enemy.stats.life -= damage;
+                else this.enemy.stats.life = 0;
 
-                this.logs.push({
-                    content: this.player.name +" atacou com " + damage + " de ataque",
-                    type: "player"
-                })
+                this.addLog(this.player.name + " atacou com " + damage + " de ataque", "player")
             } else if (type === 'defense') {
+                this.actionPlayer = 'defense';
+
                 let min = Math.ceil(5);
                 let max = Math.floor(15);
                 let absorb = (Math.floor(Math.random() * (max - min) + min)) + this.player.stats.defense
+                this.actionPlayer += "|"+ absorb
 
-                this.logs.push({
-                    content: this.player.name +" está me modo de defesa, absorvendo " + absorb + " de dano",
-                    type: "player"
-                })
+                this.addLog(this.player.name + " está me modo de defesa, absorvendo " + absorb + " de dano", "player")
             } else if (type === 'cure') {
+                this.actionPlayer = 'cure';
                 let min = Math.ceil(5);
                 let max = Math.floor(15);
                 let cured = (Math.floor(Math.random() * (max - min) + min)) + this.player.stats.magic
 
-                this.logs.push({
-                    content: this.player.name +" curou " + cured + " pontos de vida",
-                    type: "player"
-                })
+                this.player.stats.life += cured;
+
+                this.addLog(this.player.name + " curou " + cured + " pontos de vida", "player")
             }
+
+            this.getMoveEnemy();
+        },
+        getMoveEnemy() {
+            let min = Math.ceil(8);
+            let max = Math.floor(20);
+            let damage = (Math.floor(Math.random() * (max - min) + min)) + this.enemy.stats.strength
+
+            let actPlayer = this.actionPlayer.split("|")
+            if(actPlayer[0] === 'defense') damage = damage - actPlayer[1]
+
+            if ((this.player.stats.life - damage) >= 0) this.player.stats.life -= damage;
+            else this.player.stats.life = 0;
+
+            this.addLog(this.enemy.name + " atacou com " + damage + " de ataque", "enemy")
+        },
+        addLog(content, type){
+            this.logs.push({
+                content: content,
+                type: type
+            })
         }
     }
 }
